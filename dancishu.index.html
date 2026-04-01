@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎈 单词发音魔法书</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', '微软雅黑', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .unit-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #667eea;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .unit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .unit-btn.active {
+            background: #ffd93d;
+            color: #333;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            outline: none;
+        }
+
+        .search-box::after {
+            content: "🔍";
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .word-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .word-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .word-card:hover::before {
+            opacity: 1;
+        }
+
+        .word-card:hover {
+            transform: translateY(-5px) rotate(1deg);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .word-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .word-text {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .phonetic {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .speaker-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .speaker-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.6);
+        }
+
+        .speaker-btn.playing {
+            animation: pulse 1s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .meaning {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #eee;
+        }
+
+        .memory-trick {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .memory-trick::before {
+            content: "💡";
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            font-size: 1.5em;
+            background: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .trick-title {
+            font-weight: bold;
+            color: #d63031;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .trick-content {
+            color: #2d3436;
+            line-height: 1.6;
+            font-size: 1em;
+        }
+
+        .trick-content .highlight {
+            color: #e17055;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #74b9ff;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        .floating-emoji {
+            position: fixed;
+            font-size: 2em;
+            pointer-events: none;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .stats {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+            font-size: 1.3em;
+        }
+
+        .empty-state .big-emoji {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            .word-text { font-size: 1.5em; }
+            .word-grid { grid-template-columns: 1fr; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ffd93d;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-emoji" style="top: 10%; left: 5%;">📚</div>
+    <div class="floating-emoji" style="top: 20%; right: 8%; animation-delay: 0.5s;">🎯</div>
+    <div class="floating-emoji" style="top: 60%; left: 3%; animation-delay: 1s;">⭐</div>
+    <div class="floating-emoji" style="bottom: 20%; right: 5%; animation-delay: 1.5s;">🌈</div>
+
+    <div class="container">
+        <header>
+            <h1>🎈 单词发音魔法书</h1>
+            <p class="subtitle">用有趣的联想记住每个单词！</p>
+        </header>
+
+        <div class="stats" id="stats">已加载 0 个魔法单词</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="输入单词或中文意思搜索...">
+        </div>
+
+        <div class="controls">
+            <button class="unit-btn active" onclick="filterUnit('all')">全部 ✨</button>
+            <button class="unit-btn" onclick="filterUnit('1')">第一单元 🎂</button>
+            <button class="unit-btn" onclick="filterUnit('2')">第二单元 🌸</button>
+            <button class="unit-btn" onclick="filterUnit('3')">第三单元 🐔</button>
+            <button class="unit-btn" onclick="filterUnit('4')">第四单元 ✈️</button>
+            <button class="unit-btn" onclick="filterUnit('5')">第五单元 🏙️</button>
+        </div>
+
+        <div class="word-grid" id="wordGrid"></div>
+    </div>
+
+    <script>
+        // 单词数据库 - 基于图片内容
+        const wordDatabase = [
+            // Unit 1 - 生日与数字
+            { word: "Happy Birthday", meaning: "生日快乐！", unit: "1", phonetic: "/ˈhæpi ˈbɜːrθdeɪ/", 
+              trick: "Happy(嗨皮) + Birthday(波丝得) = 嗨皮的波丝糖日！🎂" },
+            { word: "How old", meaning: "（某人）几岁了？", unit: "1", phonetic: "/haʊ əʊld/", 
+              trick: "How(好) + old(欧的) = 好欧的，你几岁啦？" },
+            { word: "grandpa", meaning: "爷爷；外公", unit: "1", phonetic: "/ˈɡrænpɑː/", 
+              trick: "grand(格朗，像'隔代') + pa(怕) = 隔代怕的，是爷爷！👴" },
+            { word: "grandma", meaning: "奶奶；外婆", unit: "1", phonetic: "/ˈɡrænmɑː/", 
+              trick: "grand(格朗) + ma(妈) = 格朗妈，是奶奶！👵" },
+            { word: "one", meaning: "一", unit: "1", phonetic: "/wʌn/", 
+              trick: "万(wan)变one，one像'弯'的棍子！1️⃣" },
+            { word: "two", meaning: "二", unit: "1", phonetic: "/tuː/", 
+              trick: "two(兔) = 两只耳朵的兔子！🐰" },
+            { word: "three", meaning: "三", unit: "1", phonetic: "/θriː/", 
+              trick: "three(思瑞) = 三思而后瑞，三是吉祥数！3️⃣" },
+            { word: "four", meaning: "四", unit: "1", phonetic: "/fɔːr/", 
+              trick: "four(佛) = 佛像有四臂！🙏" },
+            { word: "five", meaning: "五", unit: "1", phonetic: "/faɪv/", 
+              trick: "five(废物) = 五指山压住废物孙悟空！🖐️" },
+            { word: "six", meaning: "六", unit: "1", phonetic: "/sɪks/", 
+              trick: "six(西克斯) = 六六大顺，像蛇扭来扭去！🐍" },
+            { word: "seven", meaning: "七", unit: "1", phonetic: "/ˈsevn/", 
+              trick: "seven(塞文) = 七夕情人节，塞给你情书！💌" },
+            { word: "eight", meaning: "八", unit: "1", phonetic: "/eɪt/", 
+              trick: "eight(爱特) = 八月十五爱特别！🌕" },
+            { word: "nine", meaning: "九", unit: "1", phonetic: "/naɪn/", 
+              trick: "nine(耐) = 九条命，猫很耐活！🐱" },
+            { word: "ten", meaning: "十", unit: "1", phonetic: "/ten/", 
+              trick: "ten(疼) = 十全十美，但打针很疼！💉" },
+            { word: "colour", meaning: "颜色", unit: "1", phonetic: "/ˈkʌlər/", 
+              trick: "colour(卡了) = 颜色太多，眼睛卡住了！🎨" },
+            { word: "red", meaning: "红色", unit: "1", phonetic: "/red/", 
+              trick: "red(热的) = 红色像火，热热的！🔥" },
+            { word: "blue", meaning: "蓝色", unit: "1", phonetic: "/bluː/", 
+              trick: "blue(不录) = 蓝天不录视频，太美了！🌊" },
+            { word: "yellow", meaning: "黄色", unit: "1", phonetic: "/ˈjeləʊ/", 
+              trick: "yellow(耶喽) = 耶！喽！香蕉黄黄的！🍌" },
+            { word: "white", meaning: "白色", unit: "1", phonetic: "/waɪt/", 
+              trick: "white(外特) = 外面特别白，下雪了！❄️" },
+            { word: "black", meaning: "黑色", unit: "1", phonetic: "/blæk/", 
+              trick: "black(不赖客) = 黑衣人不赖做客，很酷！🥷" },
+            { word: "picture book", meaning: "图画书", unit: "1", phonetic: "/ˈpɪktʃər bʊk/", 
+              trick: "picture(劈着) + book(不克) = 劈着看的书，是图画书！📖" },
+            { word: "play sport", meaning: "做运动", unit: "1", phonetic: "/pleɪ spɔːt/", 
+              trick: "play(普累) + sport(死波特) = 普累死波特，运动好累！🏃" },
+            { word: "run", meaning: "跑，奔跑", unit: "1", phonetic: "/rʌn/", 
+              trick: "run(软) = 跑起来腿软软的！🏃‍♂️" },
+            { word: "swim", meaning: "游泳", unit: "1", phonetic: "/swɪm/", 
+              trick: "swim(死命) = 死命游，不然沉下去！🏊" },
+            { word: "dance", meaning: "跳舞", unit: "1", phonetic: "/dɑːns/", 
+              trick: "dance(当死) = 跳舞累到当死！💃" },
+
+            // Unit 2 - 家庭与职业
+            { word: "plant flowers", meaning: "种花", unit: "2", phonetic: "/plɑːnt ˈflaʊərz/", 
+              trick: "plant(普兰特) + flowers(花儿子) = 普兰特的儿子是种花匠！🌸" },
+            { word: "ride bikes", meaning: "骑自行车", unit: "2", phonetic: "/raɪd baɪks/", 
+              trick: "ride(瑞的) + bikes(拜克斯) = 瑞的拜克斯，骑车去拜年！🚲" },
+            { word: "aunt", meaning: "姑母，姨母，舅母，伯母", unit: "2", phonetic: "/ɑːnt/", 
+              trick: "aunt(昂特) = 阿姨昂首特别优雅！👩" },
+            { word: "uncle", meaning: "伯父，叔父，舅父，姑父", unit: "2", phonetic: "/ˈʌŋkl/", 
+              trick: "uncle(昂扣) = 昂起头扣帽子，是叔叔！👨" },
+            { word: "cousin", meaning: "堂（或表）兄弟，堂（或表）姐妹", unit: "2", phonetic: "/ˈkʌzn/", 
+              trick: "cousin(卡怎) = 卡在怎么叫？是表哥还是堂哥？👫" },
+            { word: "she", meaning: "她", unit: "2", phonetic: "/ʃiː/", 
+              trick: "she(西/诗) = 她像诗一样美！👧" },
+            { word: "job", meaning: "工作，职业", unit: "2", phonetic: "/dʒɒb/", 
+              trick: "job(照不) = 找工作照不到，好难！💼" },
+            { word: "doctor", meaning: "医生，大夫", unit: "2", phonetic: "/ˈdɒktər/", 
+              trick: "doctor(倒克特) = 医生倒着克服特别难的病！👨‍⚕️" },
+            { word: "worker", meaning: "工人", unit: "2", phonetic: "/ˈwɜːrkər/", 
+              trick: "worker(沃克) = 工人沃克在走路工作！👷" },
+            { word: "farmer", meaning: "农民，农场主", unit: "2", phonetic: "/ˈfɑːrmər/", 
+              trick: "farmer(发么) = 农民发财了么？种庄稼呢！👨‍🌾" },
+            { word: "driver", meaning: "司机，驾驶员", unit: "2", phonetic: "/ˈdraɪvər/", 
+              trick: "driver(拽我) = 司机拽我上车！🚗" },
+            { word: "What's wrong", meaning: "出了什么事？", unit: "2", phonetic: "/wɒts rɒŋ/", 
+              trick: "What's(沃茨) + wrong(让) = 沃茨让怎么了？🤔" },
+            { word: "angry", meaning: "发怒的，生气的", unit: "2", phonetic: "/ˈæŋɡri/", 
+              trick: "angry(安格瑞) = 安格瑞很生气！😠" },
+            { word: "happy", meaning: "高兴的", unit: "2", phonetic: "/ˈhæpi/", 
+              trick: "happy(嗨皮) = 嗨！皮一下很开心！😄" },
+
+            // Unit 3 - 农场与季节
+            { word: "tired", meaning: "困倦的，累的", unit: "3", phonetic: "/ˈtaɪərd/", 
+              trick: "tired(太饿的) = 太累了像太饿了！😴" },
+            { word: "sad", meaning: "伤心的，难过的", unit: "3", phonetic: "/sæd/", 
+              trick: "sad(赛的) = 比赛输了，好伤心！😢" },
+            { word: "farm", meaning: "农场；养殖场", unit: "3", phonetic: "/fɑːrm/", 
+              trick: "farm(发母) = 农场发母鸡，咯咯哒！🐔" },
+            { word: "animal", meaning: "动物，牲畜", unit: "3", phonetic: "/ˈænɪml/", 
+              trick: "animal(爱你猫) = 爱你猫，动物都爱猫！🐱" },
+            { word: "chicken", meaning: "鸡", unit: "3", phonetic: "/ˈtʃɪkɪn/", 
+              trick: "chicken(吃肯) = 吃肯德基，吃鸡！🍗" },
+            { word: "sheep", meaning: "羊，绵羊", unit: "3", phonetic: "/ʃiːp/", 
+              trick: "sheep(睡扑) = 羊睡扑在地上，咩~🐑" },
+            { word: "horse", meaning: "马", unit: "3", phonetic: "/hɔːrs/", 
+              trick: "horse(耗死) = 马跑起来耗死敌人！🐴" },
+            { word: "cow", meaning: "母牛，奶牛", unit: "3", phonetic: "/kaʊ/", 
+              trick: "cow(靠) = 靠！奶牛挤奶了！🐄" },
+            { word: "have a picnic", meaning: "野餐", unit: "3", phonetic: "/hæv ə ˈpɪknɪk/", 
+              trick: "picnic(皮克尼克) = 皮克和尼克去野餐！🧺" },
+            { word: "let's", meaning: "让我们", unit: "3", phonetic: "/lets/", 
+              trick: "let's(赖次) = 赖着这次，让我们走吧！🚶" },
+            { word: "go over", meaning: "越过，翻过", unit: "3", phonetic: "/ɡəʊ ˈəʊvər/", 
+              trick: "go(够) + over(欧我) = 够欧我，翻过去了！🏔️" },
+            { word: "hill", meaning: "小山，小丘", unit: "3", phonetic: "/hɪl/", 
+              trick: "hill(嘿呦) = 嘿呦！爬上小山！⛰️" },
+            { word: "river", meaning: "江，河", unit: "3", phonetic: "/ˈrɪvər/", 
+              trick: "river(瑞我) = 瑞士的我在河边！🌊" },
+            { word: "lake", meaning: "湖，湖泊", unit: "3", phonetic: "/leɪk/", 
+              trick: "lake(累克) = 累了一克，在湖边休息！🏞️" },
+            { word: "forest", meaning: "森林", unit: "3", phonetic: "/ˈfɒrɪst/", 
+              trick: "forest(佛瑞斯特) = 佛在瑞斯特森林里！🌲" },
+            { word: "spring", meaning: "春天，春季", unit: "3", phonetic: "/sprɪŋ/", 
+              trick: "spring(死不硬) = 春天来了，冰死不硬了！🌸" },
+            { word: "summer", meaning: "夏天，夏季", unit: "3", phonetic: "/ˈsʌmər/", 
+              trick: "summer(萨默) = 萨默天好热，吃西瓜！☀️" },
+            { word: "autumn", meaning: "秋天，秋季", unit: "3", phonetic: "/ˈɔːtəm/", 
+              trick: "autumn(奥特们) = 秋天奥特曼打落叶怪！🍂" },
+            { word: "winter", meaning: "冬天，冬季", unit: "3", phonetic: "/ˈwɪntər/", 
+              trick: "winter(温特) = 冬天温特暖和！❄️" },
+            { word: "favourite", meaning: "最喜欢的", unit: "3", phonetic: "/ˈfeɪvərɪt/", 
+              trick: "favourite(飞我瑞特) = 飞我瑞特是最喜欢的超级英雄！⭐" },
+            { word: "season", meaning: "季节", unit: "3", phonetic: "/ˈsiːzn/", 
+              trick: "season(西怎) = 西怎知道现在是哪个季节？🗓️" },
+            { word: "fly kites", meaning: "放风筝", unit: "3", phonetic: "/flaɪ kaɪts/", 
+              trick: "fly(弗莱) + kites(凯特斯) = 弗莱和凯特斯放风筝！🪁" },
+            { word: "skate", meaning: "滑冰", unit: "3", phonetic: "/skeɪt/", 
+              trick: "skate(死给特) = 死给特，滑冰别摔跤！⛸️" },
+
+            // Unit 4 - 旅行与交通
+            { word: "travel", meaning: "旅行", unit: "4", phonetic: "/ˈtrævl/", 
+              trick: "travel(踹我) = 旅行时有人踹我上车！✈️" },
+            { word: "safe", meaning: "安全的", unit: "4", phonetic: "/seɪf/", 
+              trick: "safe(谁夫) = 谁是丈夫？安全的那个！🛡️" },
+            { word: "park", meaning: "公园", unit: "4", phonetic: "/pɑːrk/", 
+              trick: "park(怕克) = 怕克星人在公园！🌳" },
+            { word: "by bus", meaning: "乘公共汽车", unit: "4", phonetic: "/baɪ bʌs/", 
+              trick: "bus(巴斯) = 坐巴斯光年的公共汽车！🚌" },
+            { word: "on foot", meaning: "步行", unit: "4", phonetic: "/ɒn fʊt/", 
+              trick: "foot(福特) = 在福特车上走路？不，是用脚走！🚶" },
+            { word: "fast", meaning: "快的，快速的", unit: "4", phonetic: "/fɑːst/", 
+              trick: "fast(发斯特) = 发斯特跑得快！⚡" },
+            { word: "on the way", meaning: "在路上", unit: "4", phonetic: "/ɒn ðə weɪ/", 
+              trick: "way(喂) = 在路上喂，快到了！🛤️" },
+            { word: "we", meaning: "我们", unit: "4", phonetic: "/wiː/", 
+              trick: "we(为) = 我们为了梦想！👥" },
+            { word: "plane", meaning: "飞机", unit: "4", phonetic: "/pleɪn/", 
+              trick: "plane(普累恩) = 普累恩坐飞机不累！✈️" },
+            { word: "ship", meaning: "大船，海轮", unit: "4", phonetic: "/ʃɪp/", 
+              trick: "ship(谁扑) = 谁扑通跳上船？🚢" },
+            { word: "far", meaning: "远的", unit: "4", phonetic: "/fɑːr/", 
+              trick: "far(发) = 发！好远啊！🌌" },
+            { word: "close", meaning: "接近的，靠近的", unit: "4", phonetic: "/kləʊz/", 
+              trick: "close(克楼兹) = 克楼兹靠近点！🤝" },
+            { word: "Excuse me", meaning: "劳驾。", unit: "4", phonetic: "/ɪkˈskjuːs miː/", 
+              trick: "Excuse(一颗死Q) + me(密) = 一颗死Q秘密，劳驾让让！🙏" },
+            { word: "shop", meaning: "商店", unit: "4", phonetic: "/ʃɒp/", 
+              trick: "shop(谁扑) = 谁扑进商店买东西？🛍️" },
+            { word: "walk down", meaning: "沿着走，顺着走", unit: "4", phonetic: "/wɔːk daʊn/", 
+              trick: "walk(沃克) + down(当) = 沃克当向导，沿着走！🚶" },
+            { word: "street", meaning: "大街，街道", unit: "4", phonetic: "/striːt/", 
+              trick: "street(死追特) = 死追特，在大街上追！🏙️" },
+            { word: "turn right", meaning: "向右转", unit: "4", phonetic: "/tɜːrn raɪt/", 
+              trick: "turn(特恩) + right(瑞特) = 特恩瑞特向右转！➡️" },
+            { word: "left", meaning: "左边；左边的", unit: "4", phonetic: "/left/", 
+              trick: "left(来福特) = 来福特在左边！⬅️" },
+            { word: "water", meaning: "水", unit: "4", phonetic: "/ˈwɔːtər/", 
+              trick: "water(沃特) = 沃特要喝水！💧" },
+            { word: "noodle", meaning: "面条", unit: "4", phonetic: "/ˈnuːdl/", 
+              trick: "noodle(努豆) = 努力吃豆豆面条！🍜" },
+            { word: "bread", meaning: "面包", unit: "4", phonetic: "/bred/", 
+              trick: "bread(不瑞的) = 不瑞的面包，我要吃！🍞" },
+            { word: "milk", meaning: "牛奶", unit: "4", phonetic: "/mɪlk/", 
+              trick: "milk(密欧克) = 密欧克喝牛奶长高高！🥛" },
+            { word: "zoo", meaning: "动物园", unit: "4", phonetic: "/zuː/", 
+              trick: "zoo(祖) = 祖爷爷去动物园！🦁" },
+
+            // Unit 5 - 城市与中国
+            { word: "China", meaning: "中国", unit: "5", phonetic: "/ˈtʃaɪnə/", 
+              trick: "China(拆哪) = 拆哪？中国建设快！🇨🇳" },
+            { word: "star", meaning: "星星", unit: "5", phonetic: "/stɑːr/", 
+              trick: "star(死大) = 死大的星星！⭐" },
+            { word: "sea", meaning: "大海", unit: "5", phonetic: "/siː/", 
+              trick: "sea(谁) = 谁在大海里？🌊" },
+            { word: "sky", meaning: "天空", unit: "5", phonetic: "/skaɪ/", 
+              trick: "sky(死盖) = 死盖住天空的云！☁️" },
+            { word: "green", meaning: "绿色", unit: "5", phonetic: "/ɡriːn/", 
+              trick: "green(格林) = 格林童话是绿色的！🌿" },
+            { word: "pink", meaning: "粉色", unit: "5", phonetic: "/pɪŋk/", 
+              trick: "pink(聘客) = 聘客穿粉色衣服！🌸" },
+            { word: "food", meaning: "食物", unit: "5", phonetic: "/fuːd/", 
+              trick: "food(富的) = 富的食物多！🍔" },
+            { word: "some", meaning: "一些", unit: "5", phonetic: "/sʌm/", 
+              trick: "some(萨姆) = 萨姆要一些！🤲" },
+            { word: "meat", meaning: "肉", unit: "5", phonetic: "/miːt/", 
+              trick: "meat(密特) = 密特爱吃肉！🥩" },
+            { word: "Mrs", meaning: "夫人", unit: "5", phonetic: "/ˈmɪsɪz/", 
+              trick: "Mrs(密瑟斯) = 密瑟斯夫人好！👩" },
+            { word: "love", meaning: "爱", unit: "5", phonetic: "/lʌv/", 
+              trick: "love(拉我) = 爱就是拉我一把！❤️" },
+            { word: "Chinese", meaning: "中文，中国人", unit: "5", phonetic: "/ˌtʃaɪˈniːz/", 
+              trick: "Chinese(拆你子) = 拆你子，我是中国人！🇨🇳" },
+            { word: "fish", meaning: "鱼", unit: "5", phonetic: "/fɪʃ/", 
+              trick: "fish(飞是) = 飞是鱼跃出水面！🐟" },
+            { word: "hot pot", meaning: "火锅", unit: "5", phonetic: "/hɒt pɒt/", 
+              trick: "hot(好烫) + pot(破特) = 好烫的破特锅，火锅！🍲" },
+            { word: "vegetable", meaning: "蔬菜", unit: "5", phonetic: "/ˈvedʒtəbl/", 
+              trick: "vegetable(外基特波) = 外基特波爱吃蔬菜！🥬" },
+            { word: "great", meaning: "伟大的", unit: "5", phonetic: "/ɡreɪt/", 
+              trick: "great(格瑞特) = 格瑞特真伟大！👍" },
+            { word: "city", meaning: "城市", unit: "5", phonetic: "/ˈsɪti/", 
+              trick: "city(谁踢) = 谁踢进了城市？⚽" },
+            { word: "place", meaning: "地方", unit: "5", phonetic: "/pleɪs/", 
+              trick: "place(普累斯) = 普累斯这个地方很好！📍" },
+            { word: "the Great Wall", meaning: "长城", unit: "5", phonetic: "/ðə ɡreɪt wɔːl/", 
+              trick: "Great(格瑞特) + Wall(我哦) = 格瑞特在我哦长城上！🏯" },
+            { word: "lots of", meaning: "许多", unit: "5", phonetic: "/lɒts əv/", 
+              trick: "lots(落茨) + of(哦夫) = 落茨哦夫，好多啊！🔢" },
+            { word: "people", meaning: "人们", unit: "5", phonetic: "/ˈpiːpl/", 
+              trick: "people(皮剖) = 皮剖是人们！👨‍👩‍👧‍👦" }
+        ];
+
+        let currentUnit = 'all';
+        let filteredWords = [];
+
+        function init() {
+            filterUnit('all');
+            
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                if (searchTerm === '') {
+                    renderWords(filteredWords);
+                } else {
+                    const searchResults = wordDatabase.filter(w => 
+                        w.word.toLowerCase().includes(searchTerm) || 
+                        w.meaning.includes(searchTerm)
+                    );
+                    renderWords(searchResults);
+                }
+            });
+        }
+
+        function filterUnit(unit) {
+            currentUnit = unit;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.unit-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (unit === 'all') {
+                filteredWords = wordDatabase;
+            } else {
+                filteredWords = wordDatabase.filter(w => w.unit === unit);
+            }
+            
+            renderWords(filteredWords);
+            updateStats();
+        }
+
+        function renderWords(words) {
+            const grid = document.getElementById('wordGrid');
+            
+            if (words.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <span class="big-emoji">🔍</span>
+                        <p>没找到这个单词呢，试试别的？</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = words.map((word, index) => `
+                <div class="word-card" style="animation: fadeIn 0.5s ease ${index * 0.05}s both;">
+                    <div class="word-header">
+                        <div>
+                            <div class="word-text">${word.word}</div>
+                            <div class="phonetic">${word.phonetic}</div>
+                        </div>
+                        <button class="speaker-btn" onclick="speak('${word.word}', this)" title="点击发音">
+                            🔊
+                        </button>
+                    </div>
+                    <div class="meaning">${word.meaning}</div>
+                    <div class="memory-trick">
+                        <div class="trick-title">🧠 记忆魔法</div>
+                        <div class="trick-content">${highlightTrick(word.trick)}</div>
+                    </div>
+                    <span class="category-tag">Unit ${word.unit}</span>
+                </div>
+            `).join('');
+            
+            updateProgress(words.length);
+        }
+
+        function highlightTrick(trick) {
+            // 高亮中文谐音部分
+            return trick.replace(/[\u4e00-\u9fa5]+/g, match => `<span class="highlight">${match}</span>`);
+        }
+
+        function speak(text, btn) {
+            if ('speechSynthesis' in window) {
+                // 取消之前的朗读
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8; // 慢一点，适合学习
+                utterance.pitch = 1.1; // 稍微高一点，更友好
+                
+                btn.classList.add('playing');
+                
+                utterance.onend = () => {
+                    btn.classList.remove('playing');
+                };
+                
+                utterance.onerror = () => {
+                    btn.classList.remove('playing');
+                    alert('发音失败，请检查浏览器语音支持');
+                };
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('你的浏览器不支持语音朗读哦，换个浏览器试试吧！');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stats').textContent = 
+                `已加载 ${filteredWords.length} 个魔法单词 ✨`;
+        }
+
+        function updateProgress(count) {
+            const percentage = (count / wordDatabase.length) * 100;
+            document.getElementById('progress').style.width = percentage + '%';
+        }
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
