@@ -5,7 +5,7 @@
 收录了人教版小学三年级下册英语全单元单词，基于纯 HTML 开发，部署在 GitHub Pages 上，全球随时随地都能学！
 
 ## 🚀 在线体验
-[直接点击打开单词书](https://pandacodernotyet.github.io/EnglishwordsbankforMu/dancishu.index.html)
+[直接点击打开单词书](https://pandacodernotyet.github.io/EnglishwordsbankforMu/.index.html)
 
 ## 📁 文件清单
 - `dancishu.index.html`：单词书主页面
