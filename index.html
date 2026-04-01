@@ -570,132 +570,143 @@
         let currentUnit = 'all';
         let filteredWords = [];
 
-        function init() {
-            filterUnit('all');
-            
-            // 搜索功能
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                if (searchTerm === '') {
-                    renderWords(filteredWords);
-                } else {
-                    const searchResults = wordDatabase.filter(w => 
-                        w.word.toLowerCase().includes(searchTerm) || 
-                        w.meaning.includes(searchTerm)
-                    );
-                    renderWords(searchResults);
-                }
-            });
+        // 更新统计和进度条
+        function updateStats(count) {
+            const displayCount = count !== undefined ? count : filteredWords.length;
+            document.getElementById('stats').textContent = 
+                currentUnit === 'all' && !document.getElementById('searchInput').value
+                    ? `已加载 ${displayCount} 个魔法单词 ✨`
+                    : `显示 ${displayCount} 个魔法单词 🎯`;
         }
 
+        function updateProgress(count) {
+            const total = wordDatabase.length;
+            const current = count !== undefined ? count : filteredWords.length;
+            const percentage = Math.round((current / total) * 100);
+            document.getElementById('progress').style.width = percentage + '%';
+        }
+
+        // 渲染单词卡片
+        function renderWords(words) {
+            const grid = document.getElementById('wordGrid');
+            
+            if (words.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <span class="big-emoji">🔍</span>
+                        <p>哎呀，没找到这个单词！</p>
+                        <p>试试别的关键词吧~</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = words.map(item => `
+                <div class="word-card" onclick="speak('${item.word.replace(/'/g, "\\'")}')">
+                    <div class="word-header">
+                        <div>
+                            <div class="word-text">${item.word}</div>
+                            <div class="phonetic">${item.phonetic}</div>
+                        </div>
+                        <button class="speaker-btn" onclick="event.stopPropagation(); speak('${item.word.replace(/'/g, "\\'")}')" title="点击发音">
+                            🔊
+                        </button>
+                    </div>
+                    <div class="meaning">${item.meaning}</div>
+                    <div class="memory-trick">
+                        <div class="trick-title">谐音记忆魔法</div>
+                        <div class="trick-content">${highlightTrick(item.trick)}</div>
+                    </div>
+                    <span class="category-tag">Unit ${item.unit}</span>
+                </div>
+            `).join('');
+        }
+
+        // 高亮谐音部分
+        function highlightTrick(trick) {
+            return trick.replace(/\(([^)]+)\)/g, '<span class="highlight">($1)</span>');
+        }
+
+        // 语音合成
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // 停止之前的播放
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                
+                // 添加播放动画
+                const btn = event?.target;
+                if (btn && btn.classList.contains('speaker-btn')) {
+                    btn.classList.add('playing');
+                    utterance.onend = () => btn.classList.remove('playing');
+                }
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('您的浏览器不支持语音播放，请使用Chrome或Edge浏览器~');
+            }
+        }
+
+        // 筛选单元
         function filterUnit(unit) {
             currentUnit = unit;
             
             // 更新按钮状态
             document.querySelectorAll('.unit-btn').forEach(btn => {
                 btn.classList.remove('active');
+                if (btn.textContent.includes(unit === 'all' ? '全部' : `第${unit}单元`)) {
+                    btn.classList.add('active');
+                }
             });
-            event.target.classList.add('active');
-            
+
+            // 筛选数据
             if (unit === 'all') {
-                filteredWords = wordDatabase;
+                filteredWords = [...wordDatabase];
             } else {
                 filteredWords = wordDatabase.filter(w => w.unit === unit);
             }
+
+            // 清空搜索框
+            document.getElementById('searchInput').value = '';
             
             renderWords(filteredWords);
             updateStats();
+            updateProgress();
         }
-
-        function renderWords(words) {
-            const grid = document.getElementById('wordGrid');
-            
-            if (words.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1/-1;">
-                        <span class="big-emoji">🔍</span>
-                        <p>没找到这个单词呢，试试别的？</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            grid.innerHTML = words.map((word, index) => `
-                <div class="word-card" style="animation: fadeIn 0.5s ease ${index * 0.05}s both;">
-                    <div class="word-header">
-                        <div>
-                            <div class="word-text">${word.word}</div>
-                            <div class="phonetic">${word.phonetic}</div>
-                        </div>
-                        <button class="speaker-btn" onclick="speak('${word.word}', this)" title="点击发音">
-                            🔊
-                        </button>
-                    </div>
-                    <div class="meaning">${word.meaning}</div>
-                    <div class="memory-trick">
-                        <div class="trick-title">🧠 记忆魔法</div>
-                        <div class="trick-content">${highlightTrick(word.trick)}</div>
-                    </div>
-                    <span class="category-tag">Unit ${word.unit}</span>
-                </div>
-            `).join('');
-            
-            updateProgress(words.length);
-        }
-
-        function highlightTrick(trick) {
-            // 高亮中文谐音部分
-            return trick.replace(/[\u4e00-\u9fa5]+/g, match => `<span class="highlight">${match}</span>`);
-        }
-
-        function speak(text, btn) {
-            if ('speechSynthesis' in window) {
-                // 取消之前的朗读
-                window.speechSynthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.8; // 慢一点，适合学习
-                utterance.pitch = 1.1; // 稍微高一点，更友好
-                
-                btn.classList.add('playing');
-                
-                utterance.onend = () => {
-                    btn.classList.remove('playing');
-                };
-                
-                utterance.onerror = () => {
-                    btn.classList.remove('playing');
-                    alert('发音失败，请检查浏览器语音支持');
-                };
-                
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert('你的浏览器不支持语音朗读哦，换个浏览器试试吧！');
-            }
-        }
-
-        function updateStats() {
-            document.getElementById('stats').textContent = 
-                `已加载 ${filteredWords.length} 个魔法单词 ✨`;
-        }
-
-        function updateProgress(count) {
-            const percentage = (count / wordDatabase.length) * 100;
-            document.getElementById('progress').style.width = percentage + '%';
-        }
-
-        // 添加CSS动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        `;
-        document.head.appendChild(style);
 
         // 初始化
+        function init() {
+            filterUnit('all');
+            
+            // 搜索功能 - 修复后的版本
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                if (searchTerm === '') {
+                    // 清空搜索，恢复当前单元的显示
+                    renderWords(filteredWords);
+                    updateStats();
+                    updateProgress();
+                } else {
+                    // 在所有单词中搜索（不限制当前单元）
+                    const searchResults = wordDatabase.filter(w => 
+                        w.word.toLowerCase().includes(searchTerm) || 
+                        w.meaning.includes(searchTerm)
+                    );
+                    renderWords(searchResults);
+                    // 搜索时临时更新统计
+                    document.getElementById('stats').textContent = 
+                        `搜索到 ${searchResults.length} 个魔法单词 🔍`;
+                    updateProgress(searchResults.length);
+                }
+            });
+        }
+
+        // 页面加载完成后初始化
         init();
     </script>
 </body>
