@@ -318,8 +318,8 @@
 
     <div class="container">
         <header>
-            <h1>🎈 单词发音魔法书</h1>
-            <p class="subtitle">用有趣的联想记住每个单词！</p>
+            <h1>🎈 宝珠的人教版三年级下册单词谐音记忆游戏</h1>
+            <p class="subtitle">家长不用会英语！</p>
         </header>
 
         <div class="stats" id="stats">已加载 0 个魔法单词</div>
@@ -333,7 +333,7 @@
             <button class="unit-btn active" onclick="filterUnit('all')">全部 ✨</button>
             <button class="unit-btn" onclick="filterUnit('1')">第一单元 🎂</button>
             <button class="unit-btn" onclick="filterUnit('2')">第二单元 🌸</button>
-            <button class="unit-btn" onclick="filterUnit('3')">第三单元 🐔</button>
+            <button class="unit-btn" onclick="filterUnit('3')">第三单元 🎨 </button>
             <button class="unit-btn" onclick="filterUnit('4')">第四单元 ✈️</button>
             <button class="unit-btn" onclick="filterUnit('5')">第五单元 🏙️</button>
         </div>
@@ -346,17 +346,17 @@
         const wordDatabase = [
             // Unit 1 - 生日与数字
             { word: "Happy Birthday", meaning: "生日快乐！", unit: "1", phonetic: "/ˈhæpi ˈbɜːrθdeɪ/", 
-              trick: "Happy(嗨皮) + Birthday(波丝得) = 嗨皮的波丝糖日！🎂" },
+              trick: "Happy(嗨皮) + Birthday(波丝得A) = 嗨皮的博士得了A！🎂" },
             { word: "How old", meaning: "（某人）几岁了？", unit: "1", phonetic: "/haʊ əʊld/", 
               trick: "How(好) + old(欧的) = 好欧的，你几岁啦？" },
             { word: "grandpa", meaning: "爷爷；外公", unit: "1", phonetic: "/ˈɡrænpɑː/", 
               trick: "grand(格朗，像'隔代') + pa(怕) = 隔代怕的，是爷爷！👴" },
             { word: "grandma", meaning: "奶奶；外婆", unit: "1", phonetic: "/ˈɡrænmɑː/", 
-              trick: "grand(格朗) + ma(妈) = 格朗妈，是奶奶！👵" },
+              trick: "grand(个软) + ma(妈) = 一个软妈，是奶奶！👵" },
             { word: "one", meaning: "一", unit: "1", phonetic: "/wʌn/", 
               trick: "万(wan)变one，one像'弯'的棍子！1️⃣" },
             { word: "two", meaning: "二", unit: "1", phonetic: "/tuː/", 
-              trick: "two(兔) = 两只耳朵的兔子！🐰" },
+              trick: "two(兔) = 两只耳朵的兔子吐了！🐰" },
             { word: "three", meaning: "三", unit: "1", phonetic: "/θriː/", 
               trick: "three(思瑞) = 三思而后瑞，三是吉祥数！3️⃣" },
             { word: "four", meaning: "四", unit: "1", phonetic: "/fɔːr/", 
@@ -376,17 +376,17 @@
             { word: "colour", meaning: "颜色", unit: "1", phonetic: "/ˈkʌlər/", 
               trick: "colour(卡了) = 颜色太多，眼睛卡住了！🎨" },
             { word: "red", meaning: "红色", unit: "1", phonetic: "/red/", 
-              trick: "red(热的) = 红色像火，热热的！🔥" },
+              trick: "red(热爱的) = 我热爱的红色！🔥" },
             { word: "blue", meaning: "蓝色", unit: "1", phonetic: "/bluː/", 
               trick: "blue(不录) = 蓝天不录视频，太美了！🌊" },
             { word: "yellow", meaning: "黄色", unit: "1", phonetic: "/ˈjeləʊ/", 
-              trick: "yellow(耶喽) = 耶！喽！香蕉黄黄的！🍌" },
+              trick: "yellow(爷漏) = 爷爷拉裤子了漏出了黄颜色！🍌" },
             { word: "white", meaning: "白色", unit: "1", phonetic: "/waɪt/", 
               trick: "white(外特) = 外面特别白，下雪了！❄️" },
             { word: "black", meaning: "黑色", unit: "1", phonetic: "/blæk/", 
-              trick: "black(不赖客) = 黑衣人不赖做客，很酷！🥷" },
+              trick: "black(不赖客) = 黑衣人不来做客，很酷！🥷" },
             { word: "picture book", meaning: "图画书", unit: "1", phonetic: "/ˈpɪktʃər bʊk/", 
-              trick: "picture(劈着) + book(不克) = 劈着看的书，是图画书！📖" },
+              trick: "picture(劈个车) + book(不克) = 图书拼不上车生气非要劈个车不可！📖" },
             { word: "play sport", meaning: "做运动", unit: "1", phonetic: "/pleɪ spɔːt/", 
               trick: "play(普累) + sport(死波特) = 普累死波特，运动好累！🏃" },
             { word: "run", meaning: "跑，奔跑", unit: "1", phonetic: "/rʌn/", 
@@ -398,9 +398,9 @@
 
             // Unit 2 - 家庭与职业
             { word: "plant flowers", meaning: "种花", unit: "2", phonetic: "/plɑːnt ˈflaʊərz/", 
-              trick: "plant(普兰特) + flowers(花儿子) = 普兰特的儿子是种花匠！🌸" },
+              trick: "plant(普兰特) + flowers(服啦我儿子) = 普兰特服了我儿子会种花！🌸" },
             { word: "ride bikes", meaning: "骑自行车", unit: "2", phonetic: "/raɪd baɪks/", 
-              trick: "ride(瑞的) + bikes(拜克斯) = 瑞的拜克斯，骑车去拜年！🚲" },
+              trick: "ride(瑞爱的) + bikes(拜克斯) = 瑞爱的拜克斯，骑车去拜年！🚲" },
             { word: "aunt", meaning: "姑母，姨母，舅母，伯母", unit: "2", phonetic: "/ɑːnt/", 
               trick: "aunt(昂特) = 阿姨昂首特别优雅！👩" },
             { word: "uncle", meaning: "伯父，叔父，舅父，姑父", unit: "2", phonetic: "/ˈʌŋkl/", 
@@ -508,7 +508,7 @@
             { word: "street", meaning: "大街，街道", unit: "4", phonetic: "/striːt/", 
               trick: "street(死追特) = 死追特，在大街上追！🏙️" },
             { word: "turn right", meaning: "向右转", unit: "4", phonetic: "/tɜːrn raɪt/", 
-              trick: "turn(特恩) + right(瑞特) = 特恩瑞特向右转！➡️" },
+              trick: "turn(特恩) + right(瑞爱特) = 特恩瑞爱特向右转！➡️" },
             { word: "left", meaning: "左边；左边的", unit: "4", phonetic: "/left/", 
               trick: "left(来福特) = 来福特在左边！⬅️" },
             { word: "water", meaning: "水", unit: "4", phonetic: "/ˈwɔːtər/", 
